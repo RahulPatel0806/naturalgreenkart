@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Natural greenkart",
+    "slug": "aggrimart",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "aggrimart",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#16A34A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.aggrimart.mobile"
+    },
+    "android": {
+      "package": "app.aggrimart.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16A34A"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-asset"
+    ],
+    "extra": {
+      "apiBaseUrl": "http://192.168.1.7:4000/api"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+# Root ignore — see backend/.gitignore and mobile/.gitignore for app-specific rules.
+node_modules/
+.DS_Store
+*.log
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Build output
+**/.next/
+**/dist/
+**/build/
+**/.expo/

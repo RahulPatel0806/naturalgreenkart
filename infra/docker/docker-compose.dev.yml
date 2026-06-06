@@ -1,0 +1,20 @@
+# Lightweight local dev: just PostgreSQL. Run the backend with `npm run dev`.
+#   docker compose -f infra/docker/docker-compose.dev.yml up -d
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aggrimart-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aggrimart
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+
+volumes:
+  pgdata_dev:

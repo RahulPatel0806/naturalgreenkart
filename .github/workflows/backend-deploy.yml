@@ -1,0 +1,57 @@
+name: Backend Deploy (Azure App Service)
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/backend-deploy.yml']
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: aggrimart-api
+  ACR_NAME: aggrimartacr
+  IMAGE_NAME: aggrimart-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Authenticate to Azure using a federated/service-principal credential.
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build & push image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:$IMAGE_TAG \
+                       -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
+                       ./backend
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:$IMAGE_TAG
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+      # Apply DB migrations against Azure PostgreSQL before flipping traffic.
+      - name: Run database migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npm ci
+          npx prisma migrate deploy
+
+      - name: Deploy to Azure Web App for Containers
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Azure logout
+        run: az logout
+        if: always()

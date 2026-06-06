@@ -1,0 +1,372 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Aggrimart — Prisma Schema
+// Grocery, Fruits & Vegetables Delivery Platform (single-store, multi-role)
+// MySQL / MariaDB + Prisma ORM
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ────────────────────────────────────────────────────────────────────
+
+enum RoleName {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
+
+enum AddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+enum ProductUnit {
+  KG
+  GRAM
+  LITRE
+  ML
+  PIECE
+  PACK
+  DOZEN
+  BUNCH
+}
+
+enum OrderStatus {
+  PENDING // placed, awaiting seller acceptance
+  ACCEPTED // seller accepted
+  REJECTED // seller rejected
+  PACKED // items packed
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED // cancelled by customer/admin
+}
+
+enum PaymentMethod {
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  ORDER_STATUS
+  SYSTEM
+  PROMO
+}
+
+// ── Identity & Access ────────────────────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(cuid())
+  name        RoleName @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+
+  @@map("roles")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  email     String?  @unique
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  isBlocked Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses     Address[]
+  cart          Cart?
+  orders        Order[]
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+  sellerProducts Product[]     @relation("SellerProducts")
+  auditLogs     AuditLog[]
+
+  @@index([roleId])
+  @@index([isBlocked])
+  @@map("users")
+}
+
+/// One-time passwords. Codes are stored hashed; never plain text.
+model OtpCode {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@map("otp_codes")
+}
+
+/// Refresh tokens are stored hashed to support rotation + revocation.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Address {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AddressType @default(HOME)
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  landmark  String?
+  city      String
+  state     String
+  pincode   String
+  latitude  Float?
+  longitude Float?
+  isDefault Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  orders Order[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ── Catalog ──────────────────────────────────────────────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products Product[]
+
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  sellerId    String
+  seller      User        @relation("SellerProducts", fields: [sellerId], references: [id])
+  price       Decimal     @db.Decimal(10, 2)
+  mrp         Decimal     @db.Decimal(10, 2)
+  unit        ProductUnit @default(PIECE)
+  unitLabel   String // e.g. "500 g", "1 kg", "6 pcs"
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  images     ProductImage[]
+  inventory  Inventory?
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([isActive])
+  @@index([name])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Inventory {
+  id                String   @id @default(cuid())
+  productId         String   @unique
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stock             Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  isOutOfStock      Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+
+  @@index([isOutOfStock])
+  @@map("inventory")
+}
+
+// ── Cart ─────────────────────────────────────────────────────────────────────
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+// ── Orders ───────────────────────────────────────────────────────────────────
+
+model Order {
+  id          String        @id @default(cuid())
+  orderNumber String        @unique
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  addressId   String?
+  address     Address?      @relation(fields: [addressId], references: [id])
+
+  // Address snapshot — orders must remain immutable even if address changes/deletes.
+  shipFullName String
+  shipPhone    String
+  shipLine1    String
+  shipLine2    String?
+  shipCity     String
+  shipState    String
+  shipPincode  String
+
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod @default(COD)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  subtotal    Decimal @db.Decimal(10, 2)
+  deliveryFee Decimal @db.Decimal(10, 2) @default(0)
+  discount    Decimal @db.Decimal(10, 2) @default(0)
+  total       Decimal @db.Decimal(10, 2)
+
+  notes        String?
+  placedAt     DateTime  @default(now())
+  acceptedAt   DateTime?
+  packedAt     DateTime?
+  dispatchedAt DateTime?
+  deliveredAt  DateTime?
+  cancelledAt  DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId, placedAt])
+  @@index([status])
+  @@index([placedAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // Snapshots — preserve what the customer actually bought.
+  productName String
+  unitLabel   String
+  price       Decimal @db.Decimal(10, 2)
+  quantity    Int
+  lineTotal   Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ── Notifications & Audit ────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType @default(ORDER_STATUS)
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String // e.g. "ORDER_STATUS_CHANGED", "PRODUCT_CREATED"
+  entity    String // e.g. "Order", "Product"
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ── App Configuration ────────────────────────────────────────────────────────
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}

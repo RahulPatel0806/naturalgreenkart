@@ -1,0 +1,64 @@
+# Local development stack: PostgreSQL + the Aggrimart backend API.
+# Usage (from repo root):
+#   docker compose -f infra/docker/docker-compose.yml up --build
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aggrimart-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aggrimart
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d aggrimart']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # One-shot: apply migrations + seed using the build stage (has Prisma CLI + tsx).
+  migrator:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: aggrimart-migrator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/aggrimart?schema=public
+    command: sh -c "npx prisma migrate deploy && npm run db:seed"
+    restart: 'no'
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: aggrimart-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      PORT: '4000'
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/aggrimart?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me-please-32chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me-please-32chars}
+      OTP_DEV_MODE: 'true'
+      CORS_ALLOWED_ORIGINS: 'http://localhost:19006,http://localhost:8081'
+    ports:
+      - '4000:4000'
+    command: ['node', 'server.js']
+
+volumes:
+  pgdata:
