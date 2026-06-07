@@ -3,12 +3,12 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Screen, Button, Card, LoadingState, ErrorState } from '@/components/ui';
+import { Screen, Button, Card, Icon, LoadingState, ErrorState } from '@/components/ui';
 import { profileApi, orderApi } from '@/api/endpoints';
 import { ApiError } from '@/api/client';
 import { useCart } from '@/features/cart/useCart';
 import { queryKeys } from '@/store/query';
-import { formatCurrency } from '@/theme/colors';
+import { colors, formatCurrency } from '@/theme/colors';
 import type { CustomerStackParamList } from '@/navigation/types';
 import type { Address } from '@/types/api';
 
@@ -67,7 +67,7 @@ export function CheckoutScreen() {
                 <Text className="mt-1 text-sm text-ink-muted">
                   {a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city}, {a.state} - {a.pincode}
                 </Text>
-                <Text className="mt-0.5 text-xs text-ink-muted">📞 {a.phone}</Text>
+                <Text className="mt-0.5 text-xs text-ink-muted">+91 {a.phone}</Text>
               </Card>
             </Pressable>
           );
@@ -81,7 +81,7 @@ export function CheckoutScreen() {
       <Card>
         <Text className="mb-2 text-base font-bold text-ink">Payment method</Text>
         <View className="flex-row items-center rounded-xl border border-primary bg-primary-light px-3 py-3">
-          <Text className="text-lg">💵</Text>
+          <Icon name="cash-outline" size={20} color={colors.primaryDark} />
           <Text className="ml-2 font-semibold text-primary-dark">Cash on Delivery</Text>
         </View>
       </Card>

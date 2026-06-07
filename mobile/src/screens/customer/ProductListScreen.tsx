@@ -40,7 +40,7 @@ export function ProductListScreen() {
       ) : query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : products.length === 0 ? (
-        <EmptyState icon="🔍" title="No products found" message="Try a different search or category." />
+        <EmptyState icon="search-outline" title="No products found" message="Try a different search or category." />
       ) : (
         <FlatList
           data={products}

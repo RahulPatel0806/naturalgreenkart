@@ -44,7 +44,7 @@ export function CartScreen() {
   if (cart.items.length === 0) {
     return (
       <Screen scroll={false}>
-        <EmptyState icon="🛒" title="Your cart is empty" message="Add fresh groceries to get started." action={{ label: 'Browse products', onPress: () => navigation.navigate('Home') }} />
+        <EmptyState icon="cart-outline" title="Your cart is empty" message="Add fresh groceries to get started." action={{ label: 'Browse products', onPress: () => navigation.navigate('Home') }} />
       </Screen>
     );
   }

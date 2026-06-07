@@ -74,7 +74,7 @@ export function OrderDetailsScreen() {
         <Text className="text-sm text-ink-muted">
           {order.shippingAddress.line1}{order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ''}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}
         </Text>
-        <Text className="mt-0.5 text-xs text-ink-muted">📞 {order.shippingAddress.phone}</Text>
+        <Text className="mt-0.5 text-xs text-ink-muted">+91 {order.shippingAddress.phone}</Text>
       </Card>
 
       <View className="mt-4 gap-2">

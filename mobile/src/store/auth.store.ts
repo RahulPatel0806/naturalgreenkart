@@ -11,6 +11,8 @@ interface AuthState {
   /** Called once on app boot to restore a session from stored tokens. */
   bootstrap: () => Promise<void>;
   setSession: (result: AuthResult) => Promise<void>;
+  /** Merge updated fields into the current user (e.g. after editing the profile). */
+  updateUser: (partial: Partial<AuthUser>) => void;
   logout: () => Promise<void>;
 }
 
@@ -34,6 +36,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     await tokenStorage.save(result.accessToken, result.refreshToken);
     set({ user: result.user, status: 'authenticated' });
   },
+
+  updateUser: (partial) => set((s) => (s.user ? { user: { ...s.user, ...partial } } : s)),
 
   logout: async () => {
     const refreshToken = await tokenStorage.getRefresh();

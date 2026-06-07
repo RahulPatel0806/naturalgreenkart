@@ -18,6 +18,8 @@ export type CustomerStackParamList = {
   Checkout: undefined;
   OrderDetails: { id: string };
   Addresses: undefined;
+  Notifications: undefined;
+  EditProfile: undefined;
 };
 
 export type SellerTabParamList = {
@@ -26,8 +28,22 @@ export type SellerTabParamList = {
   SellerOrders: undefined;
 };
 
+export type SellerStackParamList = {
+  SellerTabs: NavigatorScreenParams<SellerTabParamList>;
+  SellerOrderDetails: { id: string };
+};
+
 export type AdminTabParamList = {
   AdminDashboard: undefined;
+  Catalog: undefined;
   Users: undefined;
   AdminOrders: undefined;
+};
+
+export type AdminStackParamList = {
+  AdminTabs: NavigatorScreenParams<AdminTabParamList>;
+  /** Create when no id; edit when id present. */
+  AdminProductForm: { id?: string } | undefined;
+  AdminCategories: undefined;
+  AdminCategoryForm: { id?: string } | undefined;
 };

@@ -34,7 +34,7 @@ export const userRepository = {
       ...(params.role ? { role: { name: params.role } } : {}),
       ...(typeof params.isBlocked === 'boolean' ? { isBlocked: params.isBlocked } : {}),
       ...(params.search
-        ? { OR: [{ name: { contains: params.search, mode: 'insensitive' } }, { phone: { contains: params.search } }] }
+        ? { OR: [{ name: { contains: params.search } }, { phone: { contains: params.search } }] }
         : {}),
     };
     const [items, total] = await Promise.all([

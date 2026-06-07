@@ -44,6 +44,12 @@ const envSchema = z.object({
   AZURE_STORAGE_CONTAINER: z.string().default('product-images'),
   AZURE_BLOB_PUBLIC_BASE_URL: z.string().optional().default(''),
 
+  // Local image storage (default provider). Files are written under UPLOAD_DIR
+  // and served via GET /api/uploads/[...path]. UPLOAD_PUBLIC_BASE_URL overrides
+  // the served URL host (e.g. behind a CDN); otherwise the request origin is used.
+  UPLOAD_DIR: z.string().default('uploads'),
+  UPLOAD_PUBLIC_BASE_URL: z.string().optional().default(''),
+
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
 });
 
