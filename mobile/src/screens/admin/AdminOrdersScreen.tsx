@@ -26,7 +26,7 @@ export function AdminOrdersScreen() {
   });
 
   const update = useMutation({
-    mutationFn: ({ id, next }: { id: string; next: OrderStatus }) => adminApi.updateOrderStatus(id, next),
+    mutationFn: ({ id, next, reason }: { id: string; next: OrderStatus; reason?: string }) => adminApi.updateOrderStatus(id, next, reason),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'orders'] }),
     onError: (e) => Alert.alert('Update failed', e instanceof ApiError ? e.message : 'Try again.'),
   });
@@ -62,9 +62,9 @@ export function AdminOrdersScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           refreshing={isRefetching}
           onRefresh={refetch}
-          ListEmptyComponent={<EmptyState icon="🧾" title="No orders" />}
+          ListEmptyComponent={<EmptyState icon="receipt-outline" title="No orders" />}
           renderItem={({ item }) => (
-            <ManageOrderCard order={item} busy={update.isPending} onUpdateStatus={(next) => update.mutate({ id: item.id, next })} />
+            <ManageOrderCard order={item} busy={update.isPending} onUpdateStatus={(next, reason) => update.mutate({ id: item.id, next, reason })} />
           )}
         />
       )}

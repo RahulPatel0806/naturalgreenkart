@@ -142,6 +142,14 @@ export interface Order {
   items: OrderItem[];
   placedAt: string;
   deliveredAt: string | null;
+  timeline: {
+    placedAt: string;
+    acceptedAt: string | null;
+    packedAt: string | null;
+    dispatchedAt: string | null;
+    deliveredAt: string | null;
+    cancelledAt: string | null;
+  };
 }
 
 export interface StoreConfig {
@@ -180,6 +188,11 @@ export interface ManagedUser {
   isBlocked: boolean;
   isActive: boolean;
   createdAt: string;
+}
+
+export interface UploadResult {
+  url: string;
+  path: string;
 }
 
 export interface Notification {

@@ -1,5 +1,6 @@
 import { ActivityIndicator, Text, View } from 'react-native';
 import { Button } from './Button';
+import { Icon, type IconName } from './Icon';
 import { colors } from '@/theme/colors';
 
 /** Full-screen loading spinner. */
@@ -13,10 +14,10 @@ export function LoadingState({ label = 'Loading…' }: { label?: string }) {
 }
 
 /** Empty placeholder for lists with no data. */
-export function EmptyState({ title, message, icon = '🛒', action }: { title: string; message?: string; icon?: string; action?: { label: string; onPress: () => void } }) {
+export function EmptyState({ title, message, icon = 'cart-outline', action }: { title: string; message?: string; icon?: IconName; action?: { label: string; onPress: () => void } }) {
   return (
     <View className="flex-1 items-center justify-center px-8 py-16">
-      <Text className="text-5xl">{icon}</Text>
+      <Icon name={icon} size={56} color={colors.inkSoft} />
       <Text className="mt-4 text-center text-lg font-semibold text-ink">{title}</Text>
       {message ? <Text className="mt-1 text-center text-sm text-ink-muted">{message}</Text> : null}
       {action ? (
@@ -32,7 +33,7 @@ export function EmptyState({ title, message, icon = '🛒', action }: { title: s
 export function ErrorState({ message = 'Something went wrong.', onRetry }: { message?: string; onRetry?: () => void }) {
   return (
     <View className="flex-1 items-center justify-center px-8 py-16">
-      <Text className="text-5xl">⚠️</Text>
+      <Icon name="warning-outline" size={56} color={colors.warning} />
       <Text className="mt-4 text-center text-base font-medium text-ink">{message}</Text>
       {onRetry ? (
         <View className="mt-5 w-40">

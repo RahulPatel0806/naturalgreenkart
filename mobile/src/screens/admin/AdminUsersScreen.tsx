@@ -55,7 +55,7 @@ export function AdminUsersScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           refreshing={isRefetching}
           onRefresh={refetch}
-          ListEmptyComponent={<EmptyState icon="👥" title="No users found" />}
+          ListEmptyComponent={<EmptyState icon="people-outline" title="No users found" />}
           renderItem={({ item }) => (
             <Card className="mb-2 flex-row items-center justify-between">
               <View className="flex-1">

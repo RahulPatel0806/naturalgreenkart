@@ -36,6 +36,15 @@ export interface OrderDTO {
   items: OrderItemDTO[];
   placedAt: string;
   deliveredAt: string | null;
+  /** Lifecycle timestamps (null until that stage is reached) for progress UIs. */
+  timeline: {
+    placedAt: string;
+    acceptedAt: string | null;
+    packedAt: string | null;
+    dispatchedAt: string | null;
+    deliveredAt: string | null;
+    cancelledAt: string | null;
+  };
 }
 
 export function toOrderDTO(o: OrderWithItems): OrderDTO {
@@ -70,5 +79,13 @@ export function toOrderDTO(o: OrderWithItems): OrderDTO {
     })),
     placedAt: o.placedAt.toISOString(),
     deliveredAt: o.deliveredAt?.toISOString() ?? null,
+    timeline: {
+      placedAt: o.placedAt.toISOString(),
+      acceptedAt: o.acceptedAt?.toISOString() ?? null,
+      packedAt: o.packedAt?.toISOString() ?? null,
+      dispatchedAt: o.dispatchedAt?.toISOString() ?? null,
+      deliveredAt: o.deliveredAt?.toISOString() ?? null,
+      cancelledAt: o.cancelledAt?.toISOString() ?? null,
+    },
   };
 }

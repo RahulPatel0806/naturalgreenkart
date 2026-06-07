@@ -13,6 +13,7 @@ import type {
   Product,
   SellerDashboard,
   StoreConfig,
+  UploadResult,
   AuthUser,
 } from '@/types/api';
 
@@ -83,8 +84,9 @@ export const sellerApi = {
   deleteProduct: (id: string) => api.delete(`/seller/products/${id}`),
   updateInventory: (id: string, data: { stock?: number; isOutOfStock?: boolean }) =>
     unwrap<Product>(api.patch(`/seller/inventory/${id}`, data)),
-  orders: (params: { page?: number; status?: string }) =>
+  orders: (params: { page?: number; status?: string; search?: string }) =>
     unwrapWithMeta<Order[]>(api.get('/seller/orders', { params })) as Promise<Page<Order>>,
+  order: (id: string) => unwrap<Order>(api.get(`/seller/orders/${id}`)),
   updateOrderStatus: (id: string, status: string, reason?: string) =>
     unwrap<Order>(api.patch(`/seller/orders/${id}/status`, { status, reason })),
 };
@@ -99,6 +101,34 @@ export const adminApi = {
     unwrapWithMeta<Order[]>(api.get('/admin/orders', { params })) as Promise<Page<Order>>,
   updateOrderStatus: (id: string, status: string, reason?: string) =>
     unwrap<Order>(api.patch(`/admin/orders/${id}/status`, { status, reason })),
+  // Catalog — products
+  products: (params: { page?: number; categoryId?: string; search?: string; sort?: string }) =>
+    unwrapWithMeta<Product[]>(api.get('/admin/products', { params })) as Promise<Page<Product>>,
+  product: (id: string) => unwrap<Product>(api.get(`/admin/products/${id}`)),
+  createProduct: (data: unknown) => unwrap<Product>(api.post('/admin/products', data)),
+  updateProduct: (id: string, data: unknown) => unwrap<Product>(api.put(`/admin/products/${id}`, data)),
+  deleteProduct: (id: string) => api.delete(`/admin/products/${id}`),
+
+  // Catalog — categories
   categories: () => unwrap<Category[]>(api.get('/admin/categories')),
   createCategory: (data: Partial<Category>) => unwrap<Category>(api.post('/admin/categories', data)),
+  updateCategory: (id: string, data: Partial<Category>) => unwrap<Category>(api.put(`/admin/categories/${id}`, data)),
+  deleteCategory: (id: string) => api.delete(`/admin/categories/${id}`),
+};
+
+// ── Uploads (images) ──────────────────────────────────────────────────
+export const uploadApi = {
+  /** Upload a local image file (file:// uri) and return its public URL. */
+  image: (uri: string, prefix: 'products' | 'categories' = 'products') => {
+    const match = /\.(\w+)$/.exec(uri);
+    const ext = (match?.[1] ?? 'jpg').toLowerCase();
+    const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    const form = new FormData();
+    // React Native FormData file shape.
+    form.append('file', { uri, name: `upload.${ext}`, type: mime } as unknown as Blob);
+    form.append('prefix', prefix);
+    return unwrap<UploadResult>(
+      api.post('/uploads', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    );
+  },
 };

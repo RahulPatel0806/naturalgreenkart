@@ -12,6 +12,8 @@ import { ProductDetailsScreen } from '@/screens/customer/ProductDetailsScreen';
 import { CheckoutScreen } from '@/screens/customer/CheckoutScreen';
 import { OrderDetailsScreen } from '@/screens/customer/OrderDetailsScreen';
 import { AddressesScreen } from '@/screens/customer/AddressesScreen';
+import { NotificationsScreen } from '@/screens/customer/NotificationsScreen';
+import { EditProfileScreen } from '@/screens/customer/EditProfileScreen';
 import { CartBadge } from '@/screens/customer/CartBadge';
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>();
@@ -24,17 +26,17 @@ function CustomerTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.inkSoft,
-        tabBarStyle: { height: 60, paddingBottom: 8, paddingTop: 6 },
+        tabBarStyle: { paddingTop: 6 },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon emoji="🏠" focused={focused} /> }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="home-outline" focused={focused} /> }} />
       <Tab.Screen
         name="Cart"
         component={CartScreen}
         options={{ tabBarIcon: ({ focused }) => <CartBadge focused={focused} /> }}
       />
-      <Tab.Screen name="Orders" component={OrdersScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon emoji="🧾" focused={focused} /> }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon emoji="👤" focused={focused} /> }} />
+      <Tab.Screen name="Orders" component={OrdersScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="receipt-outline" focused={focused} /> }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="person-outline" focused={focused} /> }} />
     </Tab.Navigator>
   );
 }
@@ -48,6 +50,8 @@ export function CustomerNavigator() {
       <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Checkout' }} />
       <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} options={{ title: 'Order details' }} />
       <Stack.Screen name="Addresses" component={AddressesScreen} options={{ title: 'My addresses' }} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notifications' }} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Edit profile' }} />
     </Stack.Navigator>
   );
 }
