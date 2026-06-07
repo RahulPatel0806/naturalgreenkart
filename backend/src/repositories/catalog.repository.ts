@@ -56,8 +56,8 @@ export const productRepository = {
       ...(params.search
         ? {
             OR: [
-              { name: { contains: params.search, mode: 'insensitive' } },
-              { description: { contains: params.search, mode: 'insensitive' } },
+              { name: { contains: params.search } },
+              { description: { contains: params.search } },
             ],
           }
         : {}),

@@ -39,7 +39,7 @@ export const orderRepository = {
     const where: Prisma.OrderWhereInput = {
       ...(params.status ? { status: params.status } : {}),
       ...(params.search
-        ? { OR: [{ orderNumber: { contains: params.search, mode: 'insensitive' } }, { shipPhone: { contains: params.search } }] }
+        ? { OR: [{ orderNumber: { contains: params.search } }, { shipPhone: { contains: params.search } }] }
         : {}),
     };
     const [items, total] = await Promise.all([

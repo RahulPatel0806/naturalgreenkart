@@ -1,6 +1,7 @@
-import { Text } from 'react-native';
+import { Icon, type IconName } from '@/components/ui/Icon';
+import { colors } from '@/theme/colors';
 
-/** Lightweight emoji tab icon (keeps the dependency footprint minimal). */
-export function TabBarIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>;
+/** Bottom-tab icon using the shared Ionicons-based Icon component. */
+export function TabBarIcon({ name, focused }: { name: IconName; focused: boolean }) {
+  return <Icon name={name} size={24} color={focused ? colors.primary : colors.inkSoft} />;
 }

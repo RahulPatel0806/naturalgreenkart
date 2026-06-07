@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Screen, Input, LoadingState, ErrorState, Skeleton } from '@/components/ui';
+import { Input, LoadingState, ErrorState, EmptyState, Skeleton, Icon } from '@/components/ui';
 import { ProductCard } from '@/components/product/ProductCard';
 import { catalogApi } from '@/api/endpoints';
 import { queryKeys } from '@/store/query';
+import { useUnreadCount } from '@/features/notifications/useNotifications';
+import { colors } from '@/theme/colors';
 import type { CustomerStackParamList } from '@/navigation/types';
 import type { Category } from '@/types/api';
 
@@ -19,7 +22,7 @@ function CategoryPill({ category, onPress }: { category: Category; onPress: () =
         {category.imageUrl ? (
           <Image source={{ uri: category.imageUrl }} className="h-10 w-10" resizeMode="contain" />
         ) : (
-          <Text className="text-2xl">🥬</Text>
+          <Icon name="leaf-outline" size={26} color={colors.primaryDark} />
         )}
       </View>
       <Text numberOfLines={2} className="mt-1 text-center text-[11px] font-medium text-ink">
@@ -32,6 +35,7 @@ function CategoryPill({ category, onPress }: { category: Category; onPress: () =
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
+  const unread = useUnreadCount();
 
   const categoriesQ = useQuery({ queryKey: queryKeys.categories, queryFn: catalogApi.categories });
   const productsQ = useQuery({
@@ -45,11 +49,26 @@ export function HomeScreen() {
     void productsQ.refetch();
   };
 
-  return (
-    <Screen refreshing={refreshing} onRefresh={onRefresh}>
-      <View className="pb-2 pt-2">
-        <Text className="text-xs text-ink-muted">Delivering to</Text>
-        <Text className="text-base font-bold text-ink">Home · Fast delivery 🛵</Text>
+  const products = productsQ.data?.data ?? [];
+
+  const header = (
+    <View className="px-4">
+      <View className="flex-row items-center justify-between pb-2 pt-2">
+        <View className="flex-1">
+          <Text className="text-xs text-ink-muted">Delivering to</Text>
+          <View className="flex-row items-center gap-1">
+            <Icon name="location" size={15} color={colors.primary} />
+            <Text className="text-base font-bold text-ink">Home · Fast delivery</Text>
+          </View>
+        </View>
+        <Pressable onPress={() => navigation.navigate('Notifications')} hitSlop={8} className="h-10 w-10 items-center justify-center rounded-full bg-white">
+          <Icon name="notifications-outline" size={22} color={colors.ink} />
+          {unread > 0 ? (
+            <View className="absolute right-1 top-1 min-w-[16px] items-center justify-center rounded-full bg-accent px-1">
+              <Text className="text-[10px] font-bold text-white">{unread > 99 ? '99+' : unread}</Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       <Pressable onPress={() => navigation.navigate('ProductList', { search: search || undefined })}>
@@ -87,20 +106,44 @@ export function HomeScreen() {
         )}
       </View>
 
-      <View className="mt-6">
-        <Text className="mb-1 text-base font-bold text-ink">Fresh picks for you</Text>
-        {productsQ.isLoading ? (
-          <LoadingState label="Loading products…" />
-        ) : productsQ.isError ? (
-          <ErrorState onRetry={() => productsQ.refetch()} />
-        ) : (
-          <View className="flex-row flex-wrap">
-            {productsQ.data?.data.map((p) => (
-              <ProductCard key={p.id} product={p} onPress={() => navigation.navigate('ProductDetails', { id: p.id })} />
-            ))}
-          </View>
-        )}
+      <View className="mb-3 mt-6 flex-row items-center justify-between">
+        <Text className="text-base font-bold text-ink">Fresh picks for you</Text>
+        {products.length > 0 ? (
+          <Pressable onPress={() => navigation.navigate('ProductList', {})} hitSlop={8}>
+            <Text className="text-sm font-semibold text-primary">See all</Text>
+          </Pressable>
+        ) : null}
       </View>
-    </Screen>
+    </View>
+  );
+
+  return (
+    <SafeAreaView edges={['top']} className="flex-1 bg-surface-muted">
+      <FlatList
+        data={products}
+        keyExtractor={(p) => p.id}
+        numColumns={2}
+        ListHeaderComponent={header}
+        columnWrapperStyle={{ paddingHorizontal: 10 }}
+        contentContainerStyle={{ paddingBottom: 32, flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+        }
+        renderItem={({ item }) => (
+          <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { id: item.id })} />
+        )}
+        ListEmptyComponent={
+          productsQ.isLoading ? (
+            <LoadingState label="Loading products…" />
+          ) : productsQ.isError ? (
+            <ErrorState onRetry={() => productsQ.refetch()} />
+          ) : (
+            <EmptyState icon="leaf-outline" title="No products yet" message="Check back soon for fresh picks." />
+          )
+        }
+      />
+    </SafeAreaView>
   );
 }

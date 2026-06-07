@@ -60,7 +60,7 @@ export function SellerProductsScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           refreshing={isRefetching}
           onRefresh={refetch}
-          ListEmptyComponent={<EmptyState icon="📦" title="No products" message="Create your first product." />}
+          ListEmptyComponent={<EmptyState icon="cube-outline" title="No products" message="Create your first product." />}
           renderItem={({ item }) => (
             <Card className="mb-2 flex-row items-center">
               <Image source={{ uri: item.primaryImage ?? PLACEHOLDER }} className="h-14 w-14 rounded-lg bg-surface-muted" resizeMode="contain" />

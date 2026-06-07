@@ -30,7 +30,7 @@ export function OrdersScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         refreshing={isRefetching}
         onRefresh={refetch}
-        ListEmptyComponent={<EmptyState icon="🧾" title="No orders yet" message="Your placed orders will appear here." />}
+        ListEmptyComponent={<EmptyState icon="receipt-outline" title="No orders yet" message="Your placed orders will appear here." />}
         renderItem={({ item }) => (
           <Pressable onPress={() => navigation.navigate('OrderDetails', { id: item.id })}>
             <Card className="mb-2">

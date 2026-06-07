@@ -35,17 +35,23 @@ export const createProductSchema = z
   })
   .refine((d) => d.price <= d.mrp, { message: 'price cannot exceed mrp', path: ['price'] });
 
-export const updateProductSchema = z.object({
-  name: z.string().trim().min(2).max(120).optional(),
-  description: z.string().trim().max(1000).optional(),
-  categoryId: z.string().min(1).optional(),
-  price: z.number().positive().max(1_000_000).optional(),
-  mrp: z.number().positive().max(1_000_000).optional(),
-  unit: productUnitSchema.optional(),
-  unitLabel: z.string().trim().min(1).max(40).optional(),
-  isActive: z.boolean().optional(),
-  images: z.array(imageInputSchema).max(8).optional(),
-});
+export const updateProductSchema = z
+  .object({
+    name: z.string().trim().min(2).max(120).optional(),
+    description: z.string().trim().max(1000).optional(),
+    categoryId: z.string().min(1).optional(),
+    price: z.number().positive().max(1_000_000).optional(),
+    mrp: z.number().positive().max(1_000_000).optional(),
+    unit: productUnitSchema.optional(),
+    unitLabel: z.string().trim().min(1).max(40).optional(),
+    stock: z.number().int().min(0).optional(),
+    isActive: z.boolean().optional(),
+    images: z.array(imageInputSchema).max(8).optional(),
+  })
+  .refine((d) => d.price === undefined || d.mrp === undefined || d.price <= d.mrp, {
+    message: 'price cannot exceed mrp',
+    path: ['price'],
+  });
 
 export const createCategorySchema = z.object({
   name: z.string().trim().min(2).max(60),

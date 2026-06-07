@@ -94,11 +94,16 @@ export const catalogService = {
     const existing = await productRepository.findById(id);
     if (!existing) throw new NotFoundError('Product');
 
-    const { images, categoryId, ...rest } = input;
+    const { images, categoryId, stock, ...rest } = input;
     await productRepository.update(id, {
       ...rest,
       ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
     });
+
+    // Stock lives on the inventory row; auto-flag out-of-stock when it hits zero.
+    if (stock !== undefined) {
+      await inventoryRepository.upsert(id, { stock, isOutOfStock: stock <= 0 });
+    }
 
     if (images) {
       const normalised = images.map((img, idx) => ({ ...img, isPrimary: img.isPrimary ?? idx === 0, sortOrder: img.sortOrder ?? idx }));
