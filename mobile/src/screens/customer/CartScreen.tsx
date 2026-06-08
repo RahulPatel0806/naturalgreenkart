@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Screen, Button, LoadingState, ErrorState, EmptyState, Card, QuantityStepper } from '@/components/ui';
 import { useCart, useCartMutations } from '@/features/cart/useCart';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { formatCurrency } from '@/theme/colors';
 import type { CustomerStackParamList, CustomerTabParamList } from '@/navigation/types';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -19,7 +20,7 @@ function Row({ item }: { item: CartItem }) {
   const { update, remove } = useCartMutations();
   return (
     <Card className="mb-2 flex-row items-center">
-      <Image source={{ uri: item.image ?? PLACEHOLDER }} className="h-14 w-14 rounded-lg bg-surface-muted" resizeMode="contain" />
+      <Image source={{ uri: resolveImageUrl(item.image) ?? PLACEHOLDER }} className="h-14 w-14 rounded-lg bg-surface-muted" resizeMode="contain" />
       <View className="ml-3 flex-1">
         <Text numberOfLines={1} className="text-sm font-semibold text-ink">{item.name}</Text>
         <Text className="text-xs text-ink-muted">{item.unitLabel}</Text>

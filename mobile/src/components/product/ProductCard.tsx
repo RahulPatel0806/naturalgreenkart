@@ -1,6 +1,7 @@
 import { Image, Pressable, Text, View } from 'react-native';
 import { Button, QuantityStepper } from '@/components/ui';
 import { useCartMutations, useCartQuantity } from '@/features/cart/useCart';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { formatCurrency } from '@/theme/colors';
 import type { Product } from '@/types/api';
 
@@ -21,7 +22,7 @@ export function ProductCard({ product, onPress }: { product: Product; onPress: (
       <Pressable onPress={onPress}>
         <View className="relative">
           <Image
-            source={{ uri: product.primaryImage ?? PLACEHOLDER }}
+            source={{ uri: resolveImageUrl(product.primaryImage) ?? PLACEHOLDER }}
             className="h-28 w-full rounded-xl bg-surface-muted"
             resizeMode="contain"
           />

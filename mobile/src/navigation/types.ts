@@ -36,6 +36,7 @@ export type SellerStackParamList = {
 export type AdminTabParamList = {
   AdminDashboard: undefined;
   Catalog: undefined;
+  AdminOffers: undefined;
   Users: undefined;
   AdminOrders: undefined;
 };
@@ -46,4 +47,6 @@ export type AdminStackParamList = {
   AdminProductForm: { id?: string } | undefined;
   AdminCategories: undefined;
   AdminCategoryForm: { id?: string } | undefined;
+  AdminCouponForm: { id?: string } | undefined;
+  AdminBannerForm: { id?: string } | undefined;
 };

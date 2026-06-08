@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, LoadingState, ErrorState, EmptyState, Icon } from '@/components/ui';
 import { adminApi } from '@/api/endpoints';
 import { ApiError } from '@/api/client';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { colors } from '@/theme/colors';
 import type { AdminStackParamList } from '@/navigation/types';
 import type { Category } from '@/types/api';
@@ -51,7 +52,7 @@ export function AdminCategoriesScreen() {
           ListEmptyComponent={<EmptyState icon="pricetags-outline" title="No categories" message="Tap + to create one." />}
           renderItem={({ item }) => (
             <Card className="mb-2 flex-row items-center">
-              <Image source={{ uri: item.imageUrl ?? PLACEHOLDER }} className="h-12 w-12 rounded-lg bg-surface-muted" resizeMode="cover" />
+              <Image source={{ uri: resolveImageUrl(item.imageUrl) ?? PLACEHOLDER }} className="h-12 w-12 rounded-lg bg-surface-muted" resizeMode="cover" />
               <View className="ml-3 flex-1">
                 <Text className="text-sm font-semibold text-ink">{item.name}</Text>
                 <Text className="text-xs text-ink-muted">{item.isActive ? 'Active' : 'Hidden'} · order {item.sortOrder}</Text>

@@ -65,6 +65,9 @@ export function OrderDetailsScreen() {
         <View className="my-2 h-px bg-surface-border" />
         <Row label="Subtotal" value={formatCurrency(order.subtotal)} />
         <Row label="Delivery fee" value={order.deliveryFee === 0 ? 'FREE' : formatCurrency(order.deliveryFee)} />
+        {order.discount > 0 ? (
+          <Row label={order.couponCode ? `Coupon (${order.couponCode})` : 'Discount'} value={`- ${formatCurrency(order.discount)}`} />
+        ) : null}
         <Row label="Total" value={formatCurrency(order.total)} bold />
       </Card>
 

@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TabBarIcon } from './TabBarIcon';
+import { AppHeader } from '@/components/ui';
 import { colors } from '@/theme/colors';
 import type { SellerTabParamList, SellerStackParamList } from './types';
 import { SellerDashboardScreen } from '@/screens/seller/SellerDashboardScreen';
@@ -16,7 +17,7 @@ function SellerTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
-        headerShadowVisible: false,
+        header: ({ options }) => <AppHeader title={options.title ?? 'Aggrimart'} subtitle="Aggrimart · Seller" icon="storefront" />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.inkSoft,
         tabBarStyle: { paddingTop: 6 },

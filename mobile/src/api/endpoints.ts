@@ -6,8 +6,11 @@ import type {
   AuthResult,
   CartSummary,
   Category,
+  Coupon,
+  CouponPreview,
   ManagedUser,
   Notification,
+  OfferBanner,
   Order,
   Pagination,
   Product,
@@ -51,7 +54,8 @@ export const cartApi = {
 export const orderApi = {
   list: (page = 1) => unwrapWithMeta<Order[]>(api.get('/orders', { params: { page } })) as Promise<Page<Order>>,
   get: (id: string) => unwrap<Order>(api.get(`/orders/${id}`)),
-  place: (addressId: string, notes?: string) => unwrap<Order>(api.post('/orders', { addressId, notes })),
+  place: (addressId: string, opts?: { notes?: string; couponCode?: string }) =>
+    unwrap<Order>(api.post('/orders', { addressId, notes: opts?.notes, couponCode: opts?.couponCode })),
   cancel: (id: string) => unwrap<Order>(api.post(`/orders/${id}/cancel`)),
   reorder: (orderId: string) => unwrap<{ cart: CartSummary; skipped: string[] }>(api.post('/orders/reorder', { orderId })),
 };
@@ -65,6 +69,12 @@ export const profileApi = {
   updateAddress: (id: string, data: Partial<Address>) => unwrap<Address>(api.put(`/addresses/${id}`, data)),
   deleteAddress: (id: string) => api.delete(`/addresses/${id}`),
   setDefaultAddress: (id: string) => unwrap<Address>(api.post(`/addresses/${id}/default`)),
+};
+
+// ── Offers (customer) ─────────────────────────────────────────────────
+export const offersApi = {
+  banners: () => unwrap<OfferBanner[]>(api.get('/offers/banners')),
+  applyCoupon: (code: string) => unwrap<CouponPreview>(api.post('/coupons/apply', { code })),
 };
 
 // ── Notifications ─────────────────────────────────────────────────────
@@ -114,6 +124,18 @@ export const adminApi = {
   createCategory: (data: Partial<Category>) => unwrap<Category>(api.post('/admin/categories', data)),
   updateCategory: (id: string, data: Partial<Category>) => unwrap<Category>(api.put(`/admin/categories/${id}`, data)),
   deleteCategory: (id: string) => api.delete(`/admin/categories/${id}`),
+
+  // Offers — coupons
+  coupons: () => unwrap<Coupon[]>(api.get('/admin/coupons')),
+  createCoupon: (data: unknown) => unwrap<Coupon>(api.post('/admin/coupons', data)),
+  updateCoupon: (id: string, data: unknown) => unwrap<Coupon>(api.put(`/admin/coupons/${id}`, data)),
+  deleteCoupon: (id: string) => api.delete(`/admin/coupons/${id}`),
+
+  // Offers — banners
+  banners: () => unwrap<OfferBanner[]>(api.get('/admin/banners')),
+  createBanner: (data: unknown) => unwrap<OfferBanner>(api.post('/admin/banners', data)),
+  updateBanner: (id: string, data: unknown) => unwrap<OfferBanner>(api.put(`/admin/banners/${id}`, data)),
+  deleteBanner: (id: string) => api.delete(`/admin/banners/${id}`),
 };
 
 // ── Uploads (images) ──────────────────────────────────────────────────

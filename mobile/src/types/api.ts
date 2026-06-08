@@ -128,6 +128,7 @@ export interface Order {
   deliveryFee: number;
   discount: number;
   total: number;
+  couponCode: string | null;
   notes: string | null;
   shippingAddress: {
     fullName: string;
@@ -150,6 +151,47 @@ export interface Order {
     deliveredAt: string | null;
     cancelledAt: string | null;
   };
+}
+
+export type DiscountType = 'PERCENT' | 'FLAT';
+
+export interface Coupon {
+  id: string;
+  code: string;
+  description: string | null;
+  discountType: DiscountType;
+  discountValue: number;
+  maxDiscount: number | null;
+  minOrderSubtotal: number;
+  usageLimit: number | null;
+  usedCount: number;
+  perUserLimit: number | null;
+  startsAt: string | null;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface OfferBanner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string;
+  couponId: string | null;
+  couponCode: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  startsAt: string | null;
+  expiresAt: string | null;
+}
+
+export interface CouponPreview {
+  code: string;
+  description: string | null;
+  discount: number;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
 }
 
 export interface StoreConfig {

@@ -1,17 +1,21 @@
 import { Image, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { useRoute, type RouteProp } from '@react-navigation/native';
-import { Screen, Button, LoadingState, ErrorState, QuantityStepper } from '@/components/ui';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Screen, Button, LoadingState, ErrorState, QuantityStepper, Icon } from '@/components/ui';
 import { catalogApi } from '@/api/endpoints';
 import { queryKeys } from '@/store/query';
 import { useCartMutations, useCartQuantity } from '@/features/cart/useCart';
-import { formatCurrency } from '@/theme/colors';
+import { resolveImageUrl } from '@/lib/imageUrl';
+import { colors, formatCurrency } from '@/theme/colors';
 import type { CustomerStackParamList } from '@/navigation/types';
 
+type Nav = NativeStackNavigationProp<CustomerStackParamList>;
 type Rt = RouteProp<CustomerStackParamList, 'ProductDetails'>;
 const PLACEHOLDER = 'https://images.aggrimart.app/placeholder.png';
 
 export function ProductDetailsScreen() {
+  const navigation = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
   const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.product(params.id),
@@ -26,7 +30,7 @@ export function ProductDetailsScreen() {
   return (
     <Screen>
       <View className="items-center rounded-2xl bg-white py-6">
-        <Image source={{ uri: product.primaryImage ?? PLACEHOLDER }} className="h-52 w-52" resizeMode="contain" />
+        <Image source={{ uri: resolveImageUrl(product.primaryImage) ?? PLACEHOLDER }} className="h-52 w-52" resizeMode="contain" />
       </View>
 
       <View className="mt-4">
@@ -58,9 +62,16 @@ export function ProductDetailsScreen() {
         {!product.inStock ? (
           <Button label="Out of stock" disabled />
         ) : qty > 0 ? (
-          <View className="flex-row items-center justify-between rounded-xl border border-primary px-4 py-2">
-            <Text className="font-semibold text-ink">In cart</Text>
-            <QuantityStepper value={qty} max={product.stock} onChange={(n) => update.mutate({ productId: product.id, quantity: n })} />
+          <View className="gap-3">
+            <View className="flex-row items-center justify-between rounded-xl border border-primary px-4 py-2">
+              <Text className="font-semibold text-ink">In cart</Text>
+              <QuantityStepper value={qty} max={product.stock} onChange={(n) => update.mutate({ productId: product.id, quantity: n })} />
+            </View>
+            <Button
+              label="Go to cart"
+              icon={<Icon name="cart-outline" size={18} color="#FFFFFF" />}
+              onPress={() => navigation.navigate('Tabs', { screen: 'Cart' })}
+            />
           </View>
         ) : (
           <Button label="Add to cart" loading={add.isPending} onPress={() => add.mutate({ productId: product.id, quantity: 1 })} />
