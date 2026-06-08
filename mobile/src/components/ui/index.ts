@@ -1,6 +1,7 @@
 export { Button } from './Button';
 export { Input } from './Input';
 export { Screen } from './Screen';
+export { AppHeader } from './AppHeader';
 export { LoadingState, EmptyState, ErrorState, Skeleton } from './States';
 export { Card, StatusBadge, QuantityStepper } from './Misc';
 export { Icon, type IconName } from './Icon';

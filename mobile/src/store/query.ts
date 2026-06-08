@@ -20,6 +20,9 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   config: ['config'] as const,
   categories: ['categories'] as const,
+  banners: ['offers', 'banners'] as const,
+  adminCoupons: ['admin', 'coupons'] as const,
+  adminBanners: ['admin', 'banners'] as const,
   products: (params: Record<string, unknown>) => ['products', params] as const,
   product: (id: string) => ['product', id] as const,
   cart: ['cart'] as const,

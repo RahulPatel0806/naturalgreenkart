@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Input, Card, LoadingState, ErrorState, EmptyState, Icon } from '@/components/ui';
 import { adminApi } from '@/api/endpoints';
 import { ApiError } from '@/api/client';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { formatCurrency, colors } from '@/theme/colors';
 import type { AdminStackParamList } from '@/navigation/types';
 import type { Category, Product } from '@/types/api';
@@ -89,7 +90,7 @@ export function AdminProductsScreen() {
           renderItem={({ item }) => (
             <Card className="mb-2">
               <View className="flex-row items-center">
-                <Image source={{ uri: item.primaryImage ?? PLACEHOLDER }} className="h-16 w-16 rounded-lg bg-surface-muted" resizeMode="cover" />
+                <Image source={{ uri: resolveImageUrl(item.primaryImage) ?? PLACEHOLDER }} className="h-16 w-16 rounded-lg bg-surface-muted" resizeMode="cover" />
                 <View className="ml-3 flex-1">
                   <Text numberOfLines={1} className="text-sm font-semibold text-ink">{item.name}</Text>
                   <Text className="text-xs text-ink-muted">{item.categoryName} · {item.unitLabel}</Text>

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Input, Card, LoadingState, ErrorState, EmptyState, Button } from '@/components/ui';
 import { sellerApi } from '@/api/endpoints';
 import { ApiError } from '@/api/client';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { formatCurrency } from '@/theme/colors';
 import type { Product } from '@/types/api';
 
@@ -63,7 +64,7 @@ export function SellerProductsScreen() {
           ListEmptyComponent={<EmptyState icon="cube-outline" title="No products" message="Create your first product." />}
           renderItem={({ item }) => (
             <Card className="mb-2 flex-row items-center">
-              <Image source={{ uri: item.primaryImage ?? PLACEHOLDER }} className="h-14 w-14 rounded-lg bg-surface-muted" resizeMode="contain" />
+              <Image source={{ uri: resolveImageUrl(item.primaryImage) ?? PLACEHOLDER }} className="h-14 w-14 rounded-lg bg-surface-muted" resizeMode="contain" />
               <View className="ml-3 flex-1">
                 <Text numberOfLines={1} className="text-sm font-semibold text-ink">{item.name}</Text>
                 <Text className="text-xs text-ink-muted">{item.unitLabel} · {formatCurrency(item.price)}</Text>

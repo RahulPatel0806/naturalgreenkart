@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Image, Pressable, Text, View } from 'react-na
 import { Icon } from './Icon';
 import { colors } from '@/theme/colors';
 import { chooseImageSource } from '@/lib/images';
+import { resolveImageUrl } from '@/lib/imageUrl';
 import { uploadApi } from '@/api/endpoints';
 import { ApiError } from '@/api/client';
 
@@ -58,7 +59,7 @@ export function ImageUploader({ value, onChange, prefix = 'products', max = 8, s
       <View className="flex-row flex-wrap gap-3">
         {value.map((img, idx) => (
           <View key={img.url} className="relative">
-            <Image source={{ uri: img.url }} className="h-24 w-24 rounded-xl bg-surface-muted" resizeMode="cover" />
+            <Image source={{ uri: resolveImageUrl(img.url) }} className="h-24 w-24 rounded-xl bg-surface-muted" resizeMode="cover" />
             {showPrimary && idx === 0 ? (
               <View className="absolute bottom-1 left-1 rounded-full bg-primary px-1.5 py-0.5">
                 <Text className="text-[10px] font-bold text-white">Primary</Text>
