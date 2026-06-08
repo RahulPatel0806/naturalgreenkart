@@ -84,10 +84,20 @@ class LocalStorage {
     }
   }
 
-  /** Build the public URL the mobile client uses to load an image. */
-  publicUrl(relativePath: string, requestOrigin: string): string {
-    const base = (env.UPLOAD_PUBLIC_BASE_URL || `${requestOrigin}/api/uploads`).replace(/\/$/, '');
-    return `${base}/${relativePath}`;
+  /**
+   * Build the public URL clients use to load an image.
+   *
+   * When no external base (CDN / fixed domain) is configured we return a
+   * *host-relative* URL (`/api/uploads/<path>`) rather than baking in the
+   * request's origin. The same row is served to every client, but each client
+   * reaches the API on a different host (localhost on web, the LAN IP on a
+   * physical device, a public domain in production) — so each must resolve the
+   * path against the origin it actually used. Baking in one origin (e.g.
+   * `http://localhost:4000`) makes images unreachable from other clients.
+   */
+  publicUrl(relativePath: string): string {
+    const base = env.UPLOAD_PUBLIC_BASE_URL.replace(/\/$/, '');
+    return base ? `${base}/${relativePath}` : `/api/uploads/${relativePath}`;
   }
 }
 

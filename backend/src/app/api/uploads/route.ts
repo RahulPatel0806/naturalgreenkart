@@ -35,7 +35,7 @@ export const POST = withHandler(
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const { relativePath } = await localStorage.save(buffer, { ext, prefix });
-    const url = localStorage.publicUrl(relativePath, req.nextUrl.origin);
+    const url = localStorage.publicUrl(relativePath);
 
     return ok({ url, path: relativePath }, { status: 201 });
   },

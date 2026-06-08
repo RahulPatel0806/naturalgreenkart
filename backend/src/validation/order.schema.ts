@@ -5,6 +5,13 @@ export const placeOrderSchema = z.object({
   addressId: z.string().min(1),
   paymentMethod: z.literal('COD').default('COD'),
   notes: z.string().trim().max(300).optional(),
+  couponCode: z
+    .string()
+    .trim()
+    .min(3)
+    .max(24)
+    .transform((v) => v.toUpperCase())
+    .optional(),
 });
 
 export const orderListQuerySchema = paginationSchema;

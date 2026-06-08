@@ -65,6 +65,11 @@ enum NotificationType {
   PROMO
 }
 
+enum DiscountType {
+  PERCENT
+  FLAT
+}
+
 // ── Identity & Access ────────────────────────────────────────────────────────
 
 model Role {
@@ -289,6 +294,11 @@ model Order {
   discount    Decimal @db.Decimal(10, 2) @default(0)
   total       Decimal @db.Decimal(10, 2)
 
+  // Applied coupon snapshot (code preserved even if the coupon is later edited/deleted).
+  couponId   String?
+  coupon     Coupon? @relation(fields: [couponId], references: [id])
+  couponCode String?
+
   notes        String?
   placedAt     DateTime  @default(now())
   acceptedAt   DateTime?
@@ -303,6 +313,7 @@ model Order {
   @@index([userId, placedAt])
   @@index([status])
   @@index([placedAt])
+  @@index([couponId, userId])
   @@map("orders")
 }
 
@@ -358,6 +369,52 @@ model AuditLog {
   @@index([actorId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ── Offers & Promotions ──────────────────────────────────────────────────────
+
+/// Discount coupon a customer can apply at checkout for an extra discount.
+model Coupon {
+  id               String       @id @default(cuid())
+  code             String       @unique // stored uppercase, e.g. "FRESH50"
+  description      String?
+  discountType     DiscountType @default(PERCENT)
+  discountValue    Decimal      @db.Decimal(10, 2) // percent (0-100) or flat ₹ amount
+  maxDiscount      Decimal?     @db.Decimal(10, 2) // optional cap for PERCENT coupons
+  minOrderSubtotal Decimal      @db.Decimal(10, 2) @default(0)
+  usageLimit       Int? // total redemptions allowed across all users (null = unlimited)
+  usedCount        Int          @default(0)
+  perUserLimit     Int? // redemptions allowed per customer (null = unlimited)
+  startsAt         DateTime?
+  expiresAt        DateTime?
+  isActive         Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  orders  Order[]
+  banners OfferBanner[]
+
+  @@index([isActive])
+  @@map("coupons")
+}
+
+/// Promotional banner shown in the customer home carousel.
+model OfferBanner {
+  id        String    @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  couponId  String? // optional coupon this banner promotes
+  coupon    Coupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@map("offer_banners")
 }
 
 // ── App Configuration ────────────────────────────────────────────────────────

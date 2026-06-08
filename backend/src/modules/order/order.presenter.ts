@@ -22,6 +22,7 @@ export interface OrderDTO {
   deliveryFee: number;
   discount: number;
   total: number;
+  couponCode: string | null;
   notes: string | null;
   shippingAddress: {
     fullName: string;
@@ -58,6 +59,7 @@ export function toOrderDTO(o: OrderWithItems): OrderDTO {
     deliveryFee: moneyToNumber(o.deliveryFee),
     discount: moneyToNumber(o.discount),
     total: moneyToNumber(o.total),
+    couponCode: o.couponCode,
     notes: o.notes,
     shippingAddress: {
       fullName: o.shipFullName,
