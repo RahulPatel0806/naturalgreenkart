@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { paginationSchema } from './common';
+import { paginationSchema, imageUrlSchema } from './common';
 
 export const productUnitSchema = z.enum(['KG', 'GRAM', 'LITRE', 'ML', 'PIECE', 'PACK', 'DOZEN', 'BUNCH']);
 
@@ -14,7 +14,7 @@ export const categoryQuerySchema = z.object({
 });
 
 const imageInputSchema = z.object({
-  url: z.string().url(),
+  url: imageUrlSchema,
   alt: z.string().max(120).optional(),
   isPrimary: z.boolean().optional(),
   sortOrder: z.number().int().min(0).optional(),
@@ -56,7 +56,7 @@ export const updateProductSchema = z
 export const createCategorySchema = z.object({
   name: z.string().trim().min(2).max(60),
   description: z.string().trim().max(300).optional(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: imageUrlSchema.optional(),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });

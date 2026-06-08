@@ -67,7 +67,19 @@ export const orderService = {
       }
 
       const deliveryFee = subtotalNum >= config.freeDeliveryAboveSubtotal ? toMoney(0) : toMoney(config.deliveryFee);
-      const total = subtotal.add(deliveryFee);
+
+      // Apply a coupon if supplied — re-validated authoritatively inside the tx.
+      let discount = toMoney(0);
+      let coupon: { couponId: string; code: string } | undefined;
+      if (input.couponCode) {
+        const { offerService } = await import('@/modules/offer/offer.service');
+        const resolved = await offerService.resolveCouponForOrder(tx, userId, input.couponCode, subtotalNum);
+        discount = toMoney(resolved.discount);
+        coupon = { couponId: resolved.couponId, code: resolved.code };
+      }
+
+      // Total never goes below zero; the discount caps at the subtotal upstream.
+      const total = subtotal.add(deliveryFee).sub(discount);
 
       // Decrement stock atomically; guard against races with a conditional update.
       for (const item of cart.items) {
@@ -94,8 +106,9 @@ export const orderService = {
         paymentMethod: input.paymentMethod,
         subtotal,
         deliveryFee,
-        discount: toMoney(0),
+        discount,
         total,
+        ...(coupon ? { coupon: { connect: { id: coupon.couponId } }, couponCode: coupon.code } : {}),
         notes: input.notes,
         items: { create: orderItemsData },
       });

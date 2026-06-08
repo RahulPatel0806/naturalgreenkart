@@ -13,6 +13,20 @@ export const otpSchema = z.string().trim().regex(/^\d{4,8}$/, 'Invalid OTP');
 
 export const idSchema = z.string().min(1);
 
+/**
+ * Image reference accepted from clients: either an absolute http(s) URL (e.g. a
+ * CDN) or a host-relative path served by our own upload route (`/api/uploads/…`).
+ * Uploads return relative paths so they resolve against whatever host each
+ * client uses, so a plain `.url()` check would wrongly reject them.
+ */
+export const imageUrlSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .refine((v) => /^https?:\/\//i.test(v) || v.startsWith('/'), {
+    message: 'Must be a valid URL or an uploaded image path',
+  });
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),

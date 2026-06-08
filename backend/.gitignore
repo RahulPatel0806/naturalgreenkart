@@ -16,4 +16,4 @@ tsconfig.tsbuildinfo
 prisma/*.db
 
 # Locally-uploaded images (served via /api/uploads)
-uploads/
+#uploads/
